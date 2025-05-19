@@ -1,6 +1,6 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
-import './LoginPage.css'; // Style file (to be created)
+import './LoginPage.css';
 
 function LoginPage() {
   return (
@@ -13,7 +13,7 @@ function LoginPage() {
         <LoginForm />
       </main>
       <footer className="login-page-footer">
-        <p>&copy; {new Date().getFullYear()} Energy Management System. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Taha Yunus Demir | Energy Management System. All rights reserved.</p>
       </footer>
     </div>
   );

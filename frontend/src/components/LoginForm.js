@@ -1,9 +1,8 @@
-// frontend/src/components/LoginForm.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import authService from '../services/authService';
 import { useAuth } from '../context/AuthContext';
-import './LoginForm.css'; // Style file (to be created)
+import './LoginForm.css';
 
 function LoginForm() {
   const [username, setUsername] = useState('');

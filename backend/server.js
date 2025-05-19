@@ -4,25 +4,25 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
-// Rota tanımlamalarını içe aktar
+// Import route definitions
 const authRoutes = require('./routes/auth');
 
-// Express uygulamasını oluştur
+// Create Express application
 const app = express();
 
-// Middleware'ler
+// Middleware
 app.use(cors()); // Enables Cross-Origin Resource Sharing
 app.use(express.json()); // Parses JSON bodies of incoming requests
 
-// Basit bir test rotası
+// Simple test route
 app.get('/', (req, res) => {
   res.send('Energy Management System Backend API is running!');
 });
 
-// API Rotaları
+// API Routes
 app.use('/api/auth', authRoutes); // Use authentication routes under /api/auth
 
-// MongoDB'ye Bağlanma
+// Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;
 const PORT = process.env.PORT || 5001; // Uses port 5001 if not in .env file
 
@@ -33,8 +33,8 @@ mongoose.connect(MONGO_URI, {
 .then(() => {
   console.log('Successfully connected to MongoDB database.');
   // Start the server after successful database connection
-  app.listen(PORT, () => {
-    console.log(`Backend server is running on port ${PORT}...`);
+  app.listen(PORT, '127.0.0.1', () => {
+    console.log(`Backend server is running on port ${PORT} at http://127.0.0.1:${PORT}/ ...`);
   });
 })
 .catch(err => {
@@ -42,7 +42,7 @@ mongoose.connect(MONGO_URI, {
   process.exit(1); // Terminate application on connection error
 });
 
-// Global hata yakalayıcı (optional, for more advanced scenarios)
+// Global error handler (optional, for more advanced scenarios)
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).send({ message: 'A server error occurred!', error: err.message });
