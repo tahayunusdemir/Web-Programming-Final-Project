@@ -1,21 +1,26 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
-import './LoginPage.css';
+import { Container, Typography, Box, Paper } from '@mui/material';
+// import './LoginPage.css'; // Styles are now managed by Material UI
 
 function LoginPage() {
   return (
-    <div className="login-page-container">
-      <header className="login-page-header">
-        <h1>Welcome to the Energy Management System</h1>
-        <p>Please log in to continue.</p>
-      </header>
-      <main className="login-form-section">
+    <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 4 }}>
+      <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Typography component="h1" variant="h5" gutterBottom>
+          Welcome to the Energy Management System
+        </Typography>
+        <Typography component="p" variant="subtitle1" color="text.secondary" sx={{ mb: 2 }}>
+          Please log in to continue.
+        </Typography>
         <LoginForm />
-      </main>
-      <footer className="login-page-footer">
-        <p>&copy; {new Date().getFullYear()} Taha Yunus Demir | Energy Management System. All rights reserved.</p>
-      </footer>
-    </div>
+        <Box mt={5}>
+          <Typography variant="body2" color="text.secondary" align="center">
+            &copy; {new Date().getFullYear()} Taha Yunus Demir | Energy Management System. All rights reserved.
+          </Typography>
+        </Box>
+      </Paper>
+    </Container>
   );
 }
 

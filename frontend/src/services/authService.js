@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080/api/auth'; // Backend API address
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5001/api/auth'; // Backend API address
 
 // New user registration
 const register = async (username, password, role = 'user') => {

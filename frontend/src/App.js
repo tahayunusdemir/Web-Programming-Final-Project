@@ -1,27 +1,75 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
 import AuthProvider, { useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
+import CertificateRegistrationPage from './pages/CertificateRegistrationPage';
+import { CssBaseline, Container, Typography, Button, Link, Box, CircularProgress, AppBar, Toolbar, IconButton } from '@mui/material';
+import MenuIcon from '@mui/icons-material/Menu'; // Example icon
 
-const HomePage = () => {
-  const { user, logout } = useAuth();
+const AppLayout = ({ children }) => {
+  const { isAuthenticated, user, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate('/login'); // Redirect to login page after logout
+    navigate('/login');
   };
 
   return (
-    <div style={{ padding: '20px', textAlign: 'center' }}>
-      <h1>Welcome, {user?.username}!</h1>
-      <p>Your Role: {user?.role}</p>
-      <p>This is your protected home page.</p>
-      <button onClick={handleLogout} style={{ padding: '10px 20px', marginTop: '20px', cursor: 'pointer' }}>
-        Logout
-      </button>
-    </div>
+    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
+      <CssBaseline />
+      {isAuthenticated && (
+        <AppBar position="static">
+          {/* <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton> */}
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Energy Management System
+            </Typography>
+            {user?.role === 'technician' && (
+              <Button color="inherit" component={RouterLink} to="/register-certificate">
+                Register Certificate
+              </Button>
+            )}
+            <Button color="inherit" onClick={handleLogout}>Logout</Button>
+          </Toolbar>
+        </AppBar>
+      )}
+      <Container component="main" sx={{ flexGrow: 1, py: 3 }}>
+        {children}
+      </Container>
+      <Box component="footer" sx={{ bgcolor: 'background.paper', py: 2, mt: 'auto' }}>
+        <Typography variant="body2" color="text.secondary" align="center">
+          &copy; {new Date().getFullYear()} Taha Yunus Demir | Energy Management System. All rights reserved.
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
+const HomePage = () => {
+  const { user } = useAuth();
+
+  return (
+    <Box sx={{ textAlign: 'center', mt: 4 }}>
+      <Typography variant="h4" component="h1" gutterBottom>
+        Welcome, {user?.username}!
+      </Typography>
+      <Typography variant="subtitle1">
+        Your Role: {user?.role}
+      </Typography>
+      <Typography variant="body1" sx={{ mt: 2 }}>
+        This is your protected home page.
+      </Typography>
+    </Box>
   );
 };
 
@@ -29,7 +77,7 @@ const HomePage = () => {
 function ProtectedRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
   }
   return isAuthenticated ? children : <Navigate to="/login" replace />;
 }
@@ -38,16 +86,31 @@ function ProtectedRoute({ children }) {
 function PublicRoute({ children }) {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
   }
   return isAuthenticated ? <Navigate to="/home" replace /> : children;
+}
+
+// Protected Route Component for Technicians
+function TechnicianProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  if (isLoading) {
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'technician') {
+    return <Navigate to="/home" replace />; // Or an unauthorized page
+  }
+  return children;
 }
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="App">
+        <AppLayout>
           <Routes>
             <Route 
               path="/login" 
@@ -66,11 +129,19 @@ function App() {
               )}
             />
             <Route 
+              path="/register-certificate"
+              element={(
+                <TechnicianProtectedRoute>
+                  <CertificateRegistrationPage />
+                </TechnicianProtectedRoute>
+              )}
+            />
+            <Route 
               path="*" 
               element={<NavigateToLandingPage />} 
             />
           </Routes>
-        </div>
+        </AppLayout>
       </Router>
     </AuthProvider>
   );
@@ -79,7 +150,7 @@ function App() {
 function NavigateToLandingPage() {
   const { isAuthenticated, isLoading } = useAuth();
   if (isLoading) {
-    return <p>Loading...</p>;
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
   }
   return isAuthenticated ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />;
 }
