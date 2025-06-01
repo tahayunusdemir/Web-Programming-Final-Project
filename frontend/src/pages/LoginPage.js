@@ -1,6 +1,7 @@
 import React from 'react';
 import LoginForm from '../components/LoginForm';
-import { Container, Typography, Box, Paper } from '@mui/material';
+import { Container, Typography, Box, Paper, Link } from '@mui/material';
+import { Link as RouterLink } from 'react-router-dom'; // Import RouterLink
 // import './LoginPage.css'; // Styles are now managed by Material UI
 
 function LoginPage() {
@@ -14,6 +15,14 @@ function LoginPage() {
           Please log in to continue.
         </Typography>
         <LoginForm />
+        <Box mt={2} textAlign="center"> {/* Adjusted margin for spacing */}
+          <Typography variant="body2">
+            Don\'t have an account?{' '}
+            <Link component={RouterLink} to="/register" variant="body2">
+              Register here
+            </Link>
+          </Typography>
+        </Box>
         <Box mt={5}>
           <Typography variant="body2" color="text.secondary" align="center">
             &copy; {new Date().getFullYear()} Taha Yunus Demir | Energy Management System. All rights reserved.

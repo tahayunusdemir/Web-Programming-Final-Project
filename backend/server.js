@@ -7,6 +7,7 @@ const cors = require('cors');
 // Import route definitions
 const authRoutes = require('./routes/auth');
 const certificateRoutes = require('./routes/certificates');
+const productionRoutes = require('./routes/production'); // Added production routes
 
 // Create Express application
 const app = express();
@@ -23,6 +24,7 @@ app.get('/', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes); // Use authentication routes under /api/auth
 app.use('/api/certificates', certificateRoutes); // Use certificate routes under /api/certificates
+app.use('/api/production', productionRoutes); // Use production routes under /api/production
 
 // Connect to MongoDB
 const MONGO_URI = process.env.MONGO_URI;

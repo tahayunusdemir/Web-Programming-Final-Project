@@ -16,7 +16,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin', 'technician', 'client'], // Update according to the roles in your application
+    enum: ['user', 'admin', 'technician', 'client', 'operationsManager'], // Update according to the roles in your application
     default: 'user'
   }
 }, {

@@ -31,12 +31,13 @@ Sprint 1 focused on creating the basic authentication mechanism. This sprint is 
 3.  JWT storage in `sessionStorage` on the frontend.
 4.  A simple user registration mechanism (backend - for testing).
 5.  Inclusion of user roles in the JWT for future role-based access.
+6.  A user registration form (frontend at `/register`) allowing new users to sign up with a username, password, and selectable role (client, technician, operationsManager).
 
 The backend involved creating a `User` model (with password hashing using `bcryptjs`), setting up the main `server.js` (Express.js, environment variables, middleware, MongoDB connection), and defining authentication routes (`/api/auth/register`, `/api/auth/login`) for user registration and login, including JWT generation.
 
-The frontend development included `AuthContext` for global authentication state management (storing token and user info in `sessionStorage`), the main `App.js` for routing (using `react-router-dom` with protected and public routes), an `authService.js` for API communication (using `axios`), and UI components like `LoginForm.js` and `LoginPage.js`. A basic `HomePage.js` with a logout function was also implemented.
+The frontend development included `AuthContext` for global authentication state management (storing token and user info in `sessionStorage`), the main `App.js` for routing (using `react-router-dom` with protected and public routes), an `authService.js` for API communication (using `axios`), and UI components like `LoginForm.js`, `LoginPage.js`, `RegistrationForm.js`, and `RegistrationPage.js`. A basic `HomePage.js` with a logout function was also implemented.
 
-## Sprint 2: Certificate Registration by Technician - IN PROGRESS
+## Sprint 2: Certificate Registration by Technician - COMPLETED
 
 Sprint 2 focuses on enabling certified technicians to register energy producer certificates for clients.
 
@@ -81,13 +82,44 @@ Sprint 2 focuses on enabling certified technicians to register energy producer c
 *   The `HomePage.js` (defined within `App.js`) has been updated with Material UI `Typography` and `Box`.
 *   Relevant `.css` files for these components have been removed as styling is now primarily handled by Material UI `sx` props and components.
 
-**Next Steps for this Feature:**
-*   Implement robust file upload handling (e.g., using `multer` on the backend) to store the actual PDF files instead of just filenames.
-*   ~~Complete the authentication and authorization middleware on the backend (`authMiddleware` in `certificates.js`) to properly verify JWTs and user roles.~~ (This step is now largely completed, with JWT verification and technician role check implemented. Further enhancements or checks for other roles might be needed later.)
-*   Add frontend styling for the new `CertificateRegistrationPage` and `CertificateRegistrationForm` components.
-*   Enhance error handling and user feedback on both frontend and backend.
+## Sprint 3: Renewable Energy Production Monitoring - COMPLETED
 
-## Setup and Running Details
+Sprint 3 focused on implementing the functionality for Operations Managers to monitor renewable energy production of clients. This sprint is now **complete**.
+
+**Key achievements:**
+1.  **Backend Updates:**
+    *   The `User` model (`backend/models/User.js`) was updated to include an 'operationsManager' role.
+    *   New API routes were added in `backend/routes/production.js`:
+        *   `GET /api/production/:idClient`: Allows an authenticated Operations Manager to fetch energy production data for a specific client. This endpoint interacts with a mock Customer API.
+    *   An authentication middleware was added to `backend/routes/production.js` to ensure only users with the 'operationsManager' role can access these routes.
+    *   The main server file (`backend/server.js`) was updated to incorporate these new production routes.
+    *   The `GET /api/certificates/search` route in `backend/routes/certificates.js` was updated to be accessible by 'operationsManager' as well, allowing them to list all clients for monitoring purposes.
+
+2.  **Frontend Updates:**
+    *   A new page `ProductionMonitoringPage.js` (`frontend/src/pages/`) was created for Operations Managers to view client energy production.
+    *   This page allows selection of a client and displays their energy production data fetched from the backend.
+    *   A new service `productionService.js` (`frontend/src/services/`) was created to:
+        *   Fetch a list of all clients (reusing the `GET /api/certificates/search` endpoint).
+        *   Fetch energy production data for a selected client (`GET /api/production/:clientId`).
+    *   The main application routing in `frontend/src/App.js` was updated:
+        *   A new protected route `/production-monitoring` was added for the `ProductionMonitoringPage`.
+        *   An `OperationsManagerProtectedRoute` component was implemented.
+        *   A link to the "Monitor Production" page was added to the `AppLayout` navigation bar, visible only to logged-in Operations Managers.
+
+3.  **Mock Customer API:**
+    *   A separate mock Node.js server (`mock-customer-api/mock-server.js`) was implemented.
+    *   This API has an endpoint `GET /production` that returns random kilowatt values, simulating real-time energy production data from a customer's system.
+
+**Functionality Overview:**
+*   An Operations Manager logs into the system.
+*   They see a "Monitor Production" link in the navigation.
+*   Clicking this link takes them to the production monitoring page.
+*   On this page, they can select a client from a dropdown list.
+*   After selecting a client and clicking "Fetch Production Data", the system retrieves data from the mock API (via the main backend) and displays the client's current energy production (kWh).
+
+## Getting Started: Setup and Execution
+
+This section guides you through setting up and running all components of the application.
 
 ### Prerequisites
 
@@ -103,45 +135,83 @@ git clone https://github.com/tahayunusdemir/Web-Programming-Final-Project.git
 cd Web-Programming-Final-Project
 ```
 
-### 2. Backend Setup
+### 2. Setting Up and Running Services
 
-```bash
-cd backend
-npm install
-```
-Create a `.env` file in the `backend` folder with your `MONGO_URI` (MongoDB connection string, e.g., for local MongoDB: `mongodb://localhost:27017/energy-management` or your Atlas string) and `JWT_SECRET`.
-```env
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_super_secret_and_long_jwt_key_here
-PORT=5001
-```
-Start the server:
-```bash
-npm run dev # For development (uses nodemon)
-# OR
-npm start   # For production
-```
+For each service (Backend, Mock Customer API, Frontend), you will need to install dependencies and then run the service. It's recommended to run each in a separate terminal.
 
-### 3. Frontend Setup
+**Important Note on `npm install`:**
+The `npm install` command downloads all necessary project dependencies. It is crucial for the initial setup of each service and should also be run if you pull changes that modify dependencies (e.g., adding a new library or updating versions). For subsequent daily runs where dependencies haven't changed, you can usually skip this step and directly use the run command (e.g., `npm run dev` or `npm start`) after navigating to the service's directory.
 
-```bash
-cd frontend
-npm install
-```
-**Note:** If you are pulling recent changes that include Material UI, ensure you run `npm install` in the `frontend` directory to install the new dependencies (`@mui/material`, `@emotion/react`, `@emotion/styled`, `@mui/icons-material`).
+**a. Backend Service (`/backend`)**
 
-You might encounter warnings about deprecated packages or security vulnerabilities. For Sprint 1, these are a secondary priority as long as the application runs. You can try `npm audit fix`. Use `npm audit fix --force` with caution.
+1.  **Initial Setup & Run (Development):**
+    ```bash
+    cd backend
+    npm install
+    npm run dev
+    ```
+    *(Alternatively, for the very first setup or after dependency changes: `cd backend && npm install && npm run dev`)*
 
-Start the frontend:
-```bash
-npm start
-```
-This usually opens the app at `http://localhost:3000`.
+2.  **Environment Configuration:**
+    Before the first run, create a `.env` file inside the `backend` folder. Copy the following structure and update it with your specific details:
+    ```env
+    MONGO_URI=your_mongodb_connection_string_here
+    JWT_SECRET=your_super_secret_and_long_jwt_key_here
+    PORT=5001
+    MOCK_CUSTOMER_API_URL=http://localhost:5002 
+    # Default mock API URL; adjust if your mock server runs elsewhere.
+    ```
+3.  **Subsequent Runs (Development):**
+    ```bash
+    cd backend
+    npm run dev
+    ```
+    The backend server typically runs on `http://localhost:5001`.
+
+**b. Mock Customer API Service (`/mock-customer-api`)**
+
+1.  **Initial Setup & Run (Development):**
+    ```bash
+    cd mock-customer-api
+    npm install
+    npm run dev
+    ```
+    *(Alternatively: `cd mock-customer-api && npm install && npm run dev`)*
+
+2.  **Subsequent Runs (Development):**
+    ```bash
+    cd mock-customer-api
+    npm run dev
+    ```
+    The mock API server typically runs on `http://localhost:5002`.
+
+**c. Frontend Service (`/frontend`)**
+
+1.  **Initial Setup & Run (Development):**
+    ```bash
+    cd frontend
+    npm install
+    npm start
+    ```
+    *(Alternatively: `cd frontend && npm install && npm start`)*
+
+    *Dependency Note:* If you pull project updates, especially those involving Material UI or other frontend libraries, re-run `npm install` in the `/frontend` directory to ensure all dependencies are current.
+
+2.  **Subsequent Runs (Development):**
+    ```bash
+    cd frontend
+    npm start
+    ```
+    The frontend development server usually opens automatically at `http://localhost:3000` in your web browser.
+
+### 3. Running All Services Concurrently
+
+To use the full application, all three services (Backend, Mock Customer API, and Frontend) must be running at the same time. Follow the steps above to start each service in its own dedicated terminal window or tab.
 
 ### 4. Testing the Application
 
-*   **a. New User Registration (via Backend API):**
-    Use Postman (or similar) to `POST` to `http://localhost:5001/api/auth/register` with `username`, `password`, and `role` in the JSON body.
+*   **a. New User Registration (via Frontend UI):**
+    Navigate to `http://localhost:3000/register`. Enter a username, password, and select a role. After successful registration, you should see a success message. You can then proceed to login with the new credentials. (Alternatively, Postman can still be used to `POST` to `http://localhost:5001/api/auth/register` with `username`, `password`, and `role`.)
 *   **b. User Login (via Frontend):**
     Navigate to `http://localhost:3000`, enter credentials, and check for redirection to `/home` and `sessionStorage` for `token` and `user`.
 *   **c. Incorrect Login Attempt:**
@@ -150,32 +220,14 @@ This usually opens the app at `http://localhost:3000`.
     Close and reopen the tab after login; you should remain logged in. Attempting to access `/login` while logged in should redirect to `/home`.
 *   **e. Logging Out:**
     Click "Logout" on `/home`. You should be redirected to `/login`, and `sessionStorage` items should be cleared.
-
-## Next Steps (For Other Sprints)
-
-*   Creation of a user registration form and page.
-*   More detailed error handling and user feedback.
-*   Forgot password / password reset feature.
-*   Role-based authorization.
-*   Frontend form validation.
-*   **Bonus:** Redesign and implement frontend pages using Material UI for a modern and consistent user experience.
-
-## Setup and Execution
-
-Detailed setup and execution instructions will be added to the README files in the backend and frontend folders and here as the sprint progresses.
-
-### Backend Setup (Preliminary Information)
-
-```bash
-cd backend
-npm install
-# Configure the .env file (MONGO_URI, JWT_SECRET)
-npm start # or npm run dev
-```
-
-### Frontend Setup (Preliminary Information)
-
-```bash
-cd frontend
-npm install
-npm start
+*   **f. Certificate Registration (Technician):**
+    1.  Log in as a 'technician'.
+    2.  Navigate to the "Register Certificate" page.
+    3.  Search for a 'client' user.
+    4.  Select a user and a PDF file (filename is sent).
+    5.  Submit the form and verify the success message.
+*   **g. Production Monitoring (Operations Manager):**
+    1.  Log in as an 'operationsManager'.
+    2.  Navigate to the "Monitor Production" page.
+    3.  Select a 'client' from the dropdown.
+    4.  Click "Fetch Production Data" and verify that random kWh data is displayed for the client.

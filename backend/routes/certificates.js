@@ -31,10 +31,18 @@ const authMiddleware = async (req, res, next) => {
     }
     req.user = decoded.user; 
 
-    // Check if the user has the 'technician' role
-    if (req.user.role !== 'technician') {
-      return res.status(403).json({ message: 'Access denied. User is not a technician.' });
-    }
+    // Allow technician or operationsManager for specific routes
+    // The role check for specific handler functions might need to be more granular
+    // if this middleware is used for routes with mixed access.
+    // For POST /register, it strictly checks for 'technician' later.
+    // For GET /search, we will allow 'technician' OR 'operationsManager'.
+    // For GET /user/:userId, it might be technician, operationsManager, or the user themselves.
+
+    // General check: if not one of the allowed roles for any certificate-related action, deny.
+    // More specific checks will be done in handlers or a more specific middleware.
+    // if (!['technician', 'operationsManager'].includes(req.user.role)) {
+    // return res.status(403).json({ message: 'Access denied. Insufficient role.' });
+    // }
 
     next();
   } catch (err) {
@@ -43,10 +51,28 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+// Middleware for routes strictly for Technicians
+const technicianOnlyAuth = (req, res, next) => {
+  if (req.user && req.user.role === 'technician') {
+    next();
+  } else {
+    return res.status(403).json({ message: 'Access denied. User is not a technician.' });
+  }
+};
+
+// Middleware for routes accessible by Technicians or Operations Managers
+const technicianOrManagerAuth = (req, res, next) => {
+  if (req.user && (req.user.role === 'technician' || req.user.role === 'operationsManager')) {
+    next();
+  } else {
+    return res.status(403).json({ message: 'Access denied. User is not a technician or operations manager.' });
+  }
+};
+
 // @route   POST api/certificates/register
 // @desc    Register a new certificate for a user
 // @access  Private (Technician only)
-router.post('/register', authMiddleware, async (req, res) => {
+router.post('/register', authMiddleware, technicianOnlyAuth, async (req, res) => {
   const { userId, userName, certificateFile } = req.body;
   const technicianId = req.user?.id; // Assuming technician's ID is available from auth middleware
 
@@ -101,36 +127,37 @@ router.get('/user/:userId', authMiddleware, async (req, res) => {
 });
 
 // @route   GET api/certificates/search
-// @desc    Search for user records by id or name (for certificate registration)
-// @access  Private (Technician only)
-router.get('/search', async (req, res) => {
-    console.log("--- /api/certificates/search route hit ---"); // Log to server console
+// @desc    Search for user records by id or name (for certificate registration or production monitoring)
+// @access  Private (Technician or Operations Manager)
+router.get('/search', authMiddleware, technicianOrManagerAuth, async (req, res) => {
+    console.log("--- /api/certificates/search route hit --- (for technicians/managers)"); 
     const { query } = req.query; // Get the search query from query parameters
 
-    if (!query) {
-      return res.status(400).json({ message: 'Search query is required.' });
-    }
+    // if (!query) {
+    //   return res.status(400).json({ message: 'Search query is required.' });
+    // }
+    // If query is empty, we list all clients. If query is present, we filter.
 
     try {
-      // Search for users by username or ID with the role 'client'
-      // For ID search, mongoose.Types.ObjectId.isValid(query) check can be added
-      // For now, let's search only by username and role
-      const usersFromDB = await User.find({
-        username: { $regex: query, $options: 'i' }, // Case-insensitive regex search for username
-        role: 'client' // Filter by role 'client'
-      }).select('_id username name'); // Select _id, username, and name fields
-
-      if (!usersFromDB.length) {
-        // Log to server console if no users found, but still return empty array to client
-        console.log(`No client users found matching query: ${query}`);
-        return res.status(200).json([]); // Return an empty array if no users are found
+      const searchCriteria = { role: 'client' };
+      if (query) {
+        // If there is a query, search by username (case-insensitive)
+        searchCriteria.username = { $regex: query, $options: 'i' };
       }
+      // If query is undefined or empty, it will find all users with role: 'client'
 
-      // Transform users to add the id field
+      const usersFromDB = await User.find(searchCriteria)
+        .select('_id username name'); // Select _id, username, and name fields
+
+      if (!usersFromDB.length && query) { // Only log "not found" if there was a specific query
+        console.log(`No client users found matching query: ${query}`);
+        // For an empty query returning no clients, this is valid, so don't log "not found"
+      }
+      // Always return 200, even if empty (e.g. no clients in system, or no matches for a query)
       const users = usersFromDB.map(user => ({
-        id: user._id.toString(), // Convert _id to string and assign to id
+        id: user._id.toString(),
         username: user.username,
-        name: user.name || user.username // Use username if name is not available
+        name: user.name || user.username
       }));
 
       res.status(200).json(users);

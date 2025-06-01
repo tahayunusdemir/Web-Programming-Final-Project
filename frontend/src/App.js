@@ -3,7 +3,9 @@ import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate, useNavigate, Link as RouterLink } from 'react-router-dom';
 import AuthProvider, { useAuth } from './context/AuthContext';
 import LoginPage from './pages/LoginPage';
+import RegistrationPage from './pages/RegistrationPage';
 import CertificateRegistrationPage from './pages/CertificateRegistrationPage';
+import ProductionMonitoringPage from './pages/ProductionMonitoringPage';
 import { CssBaseline, Container, Typography, Button, Link, Box, CircularProgress, AppBar, Toolbar, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu'; // Example icon
 
@@ -37,6 +39,11 @@ const AppLayout = ({ children }) => {
             {user?.role === 'technician' && (
               <Button color="inherit" component={RouterLink} to="/register-certificate">
                 Register Certificate
+              </Button>
+            )}
+            {user?.role === 'operationsManager' && (
+              <Button color="inherit" component={RouterLink} to="/production-monitoring">
+                Monitor Production
               </Button>
             )}
             <Button color="inherit" onClick={handleLogout}>Logout</Button>
@@ -106,6 +113,21 @@ function TechnicianProtectedRoute({ children }) {
   return children;
 }
 
+// Protected Route Component for Operations Managers
+function OperationsManagerProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  if (isLoading) {
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'operationsManager') {
+    return <Navigate to="/home" replace />; // Or an unauthorized page
+  }
+  return children;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -117,6 +139,14 @@ function App() {
               element={(
                 <PublicRoute>
                   <LoginPage />
+                </PublicRoute>
+              )}
+            />
+            <Route 
+              path="/register"
+              element={(
+                <PublicRoute>
+                  <RegistrationPage />
                 </PublicRoute>
               )}
             />
@@ -134,6 +164,14 @@ function App() {
                 <TechnicianProtectedRoute>
                   <CertificateRegistrationPage />
                 </TechnicianProtectedRoute>
+              )}
+            />
+            <Route 
+              path="/production-monitoring"
+              element={(
+                <OperationsManagerProtectedRoute>
+                  <ProductionMonitoringPage />
+                </OperationsManagerProtectedRoute>
               )}
             />
             <Route 
