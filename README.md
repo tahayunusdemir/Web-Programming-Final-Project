@@ -37,11 +37,11 @@ The backend involved creating a `User` model (with password hashing using `bcryp
 
 The frontend development included `AuthContext` for global authentication state management (storing token and user info in `sessionStorage`), the main `App.js` for routing (using `react-router-dom` with protected and public routes), an `authService.js` for API communication (using `axios`), and UI components like `LoginForm.js`, `LoginPage.js`, `RegistrationForm.js`, and `RegistrationPage.js`. A basic `HomePage.js` with a logout function was also implemented.
 
-## Sprint 2: Certificate Registration by Technician - COMPLETED
+## Sprint 2: Certificate Registration by Technician & Solar Panel Installation - COMPLETED
 
-Sprint 2 focuses on enabling certified technicians to register energy producer certificates for clients.
+Sprint 2 focuses on enabling certified technicians to register energy producer certificates for clients and allowing clients to register their solar panel installations. This sprint is now **complete**.
 
-**Key achievements:**
+**Key achievements for Certificate Registration:**
 1.  **Backend Updates:**
     *   The `User` model (`backend/models/User.js`) was updated to include a 'client' role, allowing for the distinction of client users for whom certificates will be registered.
     *   A new `Certificate` model (`backend/models/Certificate.js`) was created to store certificate information, including `userId` (linking to the client), `userName`, `certificateFile` (currently a path/filename placeholder), and `issuedBy` (linking to the technician).
@@ -64,7 +64,7 @@ Sprint 2 focuses on enabling certified technicians to register energy producer c
         *   A `TechnicianProtectedRoute` component was implemented to ensure only users with the 'technician' role can access this new route.
         *   A link to the "Register Certificate" page was added to the `HomePage` component, visible only to logged-in technicians.
 
-**Functionality Overview:**
+**Functionality Overview (Certificate Registration):**
 *   A technician logs into the system.
 *   If they are a technician, they will see a link on their home page to "Register Certificate".
 *   Clicking this link takes them to the certificate registration page.
@@ -82,11 +82,35 @@ Sprint 2 focuses on enabling certified technicians to register energy producer c
 *   The `HomePage.js` (defined within `App.js`) has been updated with Material UI `Typography` and `Box`.
 *   Relevant `.css` files for these components have been removed as styling is now primarily handled by Material UI `sx` props and components.
 
-## Sprint 3: Renewable Energy Production Monitoring - COMPLETED
+**Key achievements for Solar Panel Installation Registration:**
+1.  **Backend Updates:**
+    *   A new `Installation` model (`backend/models/Installation.js`) was created to store details about solar panel installations, including `clientId`, `address`, `panelModel`, `panelCount`, `installationDate`, and `status` (defaulting to 'Pending').
+    *   New API routes were added in `backend/routes/installations.js`:
+        *   `POST /api/installations/register`: Allows an authenticated client to register a new solar panel installation. It includes validation and saves the installation details with a 'Pending' status.
+    *   An authentication middleware (`clientAuthMiddleware`) was added to `backend/routes/installations.js` to ensure only users with the 'client' role can access this route.
+    *   The main server file (`backend/server.js`) was updated to incorporate these new installation routes.
 
-Sprint 3 focused on implementing the functionality for Operations Managers to monitor renewable energy production of clients. This sprint is now **complete**.
+2.  **Frontend Updates:**
+    *   A new page `InstallationRegistrationPage.js` (`frontend/src/pages/`) was created for clients.
+    *   A new form component `InstallationRegistrationForm.js` (`frontend/src/components/`) was developed. This form allows clients to input installation details (address, panel info, date).
+    *   A new service `installationService.js` (`frontend/src/services/`) was created for API calls related to installations.
+    *   The main application routing in `frontend/src/App.js` was updated:
+        *   A new protected route `/register-installation` was added for the `InstallationRegistrationPage`.
+        *   A `ClientProtectedRoute` component was implemented.
+        *   A link to "Register Installation" was added to the `AppLayout` navigation bar, visible only to logged-in clients.
 
-**Key achievements:**
+**Functionality Overview (Solar Panel Installation):**
+*   A client logs into the system.
+*   They see a "Register Installation" link in the navigation.
+*   Clicking this link takes them to the installation registration page.
+*   On this page, they can fill in the details of their solar panel installation.
+*   Upon submission, the installation request is saved with a 'Pending' status. (Approval mechanism is out of scope for this sprint).
+
+## Sprint 3: Renewable Energy Production Monitoring & Energy Credits - COMPLETED
+
+Sprint 3 focused on implementing the functionality for Operations Managers to monitor renewable energy production of clients and manage energy credits. This sprint is now **complete**.
+
+**Key achievements for Renewable Energy Production Monitoring:**
 1.  **Backend Updates:**
     *   The `User` model (`backend/models/User.js`) was updated to include an 'operationsManager' role.
     *   New API routes were added in `backend/routes/production.js`:
@@ -110,12 +134,40 @@ Sprint 3 focused on implementing the functionality for Operations Managers to mo
     *   A separate mock Node.js server (`mock-customer-api/mock-server.js`) was implemented.
     *   This API has an endpoint `GET /production` that returns random kilowatt values, simulating real-time energy production data from a customer's system.
 
-**Functionality Overview:**
+**Functionality Overview (Renewable Energy Production Monitoring):**
 *   An Operations Manager logs into the system.
 *   They see a "Monitor Production" link in the navigation.
 *   Clicking this link takes them to the production monitoring page.
 *   On this page, they can select a client from a dropdown list.
 *   After selecting a client and clicking "Fetch Production Data", the system retrieves data from the mock API (via the main backend) and displays the client's current energy production (kWh).
+
+**Key achievements for Accounting for Energy Credits:**
+1.  **Backend Updates:**
+    *   A new `EnergyCredit` model (`backend/models/EnergyCredit.js`) was created to store records of energy credits, including `clientId`, `kwhGenerated`, `creditsEarned`, and `calculationDate`.
+    *   New API routes were added in `backend/routes/energyCredits.js` for CRUD operations on energy credits:
+        *   `POST /api/energy-credits`: Create a new energy credit record.
+        *   `GET /api/energy-credits/client/:clientId`: Get all credits for a specific client.
+        *   `GET /api/energy-credits/:creditId`: Get a specific credit record.
+        *   `PUT /api/energy-credits/:creditId`: Update an existing credit record.
+        *   `DELETE /api/energy-credits/:creditId`: Delete a credit record.
+    *   These routes are protected and accessible only by 'operationsManager' role using the existing `authMiddleware.js`.
+    *   The main server file (`backend/server.js`) was updated to include these new energy credit routes.
+
+2.  **Frontend Updates:**
+    *   A new page `EnergyCreditsPage.js` (`frontend/src/pages/`) was created for Operations Managers.
+    *   This page allows Operations Managers to select a client, view their existing energy credits, add new credit records, edit existing ones, and delete them.
+    *   A new service `energyCreditService.js` (`frontend/src/services/`) was created to handle all API communications for energy credits.
+    *   The main application routing in `frontend/src/App.js` was updated:
+        *   A new protected route `/energy-credits` was added for the `EnergyCreditsPage`.
+        *   This route is protected by the `OperationsManagerProtectedRoute`.
+        *   A link to "Manage Energy Credits" was added to the `AppLayout` navigation bar, visible only to logged-in Operations Managers.
+
+**Functionality Overview (Energy Credits):**
+*   An Operations Manager logs into the system.
+*   They see a "Manage Energy Credits" link in the navigation.
+*   Clicking this link takes them to the energy credits management page.
+*   On this page, they can select a client to view their credits.
+*   They can add new credit records (specifying kWh generated, credits earned), edit existing records, or delete them.
 
 ## Getting Started: Setup and Execution
 
@@ -231,3 +283,15 @@ To use the full application, all three services (Backend, Mock Customer API, and
     2.  Navigate to the "Monitor Production" page.
     3.  Select a 'client' from the dropdown.
     4.  Click "Fetch Production Data" and verify that random kWh data is displayed for the client.
+*   **h. Solar Panel Installation Registration (Client):**
+    1.  Log in as a 'client'.
+    2.  Navigate to the "Register Installation" page using the link in the app bar.
+    3.  Fill out the installation details (address, city, postal code, panel model, panel count, installation date, notes).
+    4.  Submit the form and verify the success message indicating the registration is pending approval.
+*   **i. Energy Credits Management (Operations Manager):**
+    1.  Log in as an 'operationsManager'.
+    2.  Navigate to the "Manage Energy Credits" page using the link in the app bar.
+    3.  Select a 'client' from the dropdown to view their existing credits or to add new ones.
+    4.  Test adding a new credit: fill in kWh generated, credits earned, and optional notes. Verify the credit appears in the list.
+    5.  Test editing an existing credit: click the edit icon, modify details, and save. Verify the changes.
+    6.  Test deleting a credit: click the delete icon and confirm. Verify the credit is removed from the list.
