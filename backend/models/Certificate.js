@@ -18,6 +18,10 @@ const CertificateSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User', // Technician who issued the certificate
     required: true
+  },
+  originalFileName: {
+    type: String,
+    required: false // Or true if you always want to store it
   }
 }, {
   timestamps: true

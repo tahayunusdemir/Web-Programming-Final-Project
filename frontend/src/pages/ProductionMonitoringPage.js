@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Navigate } from 'react-router-dom';
-import productionService from '../services/productionService';
+import { getAllClients, getProductionData } from '../services/productionService';
 import { useAuth } from '../context/AuthContext';
 import {
   Container,
@@ -35,7 +35,7 @@ const ProductionMonitoringPage = () => {
     setLoadingClients(true);
     setError('');
     try {
-      const clientList = await productionService.getAllClients();
+      const clientList = await getAllClients();
       setClients(clientList || []);
       if (clientList && clientList.length > 0) {
         // Optionally auto-select the first client
@@ -69,7 +69,7 @@ const ProductionMonitoringPage = () => {
     setError('');
     setProductionData(null);
     try {
-      const data = await productionService.getProductionData(selectedClientId);
+      const data = await getProductionData(selectedClientId);
       setProductionData(data);
     } catch (err) {
       setError(err.message || 'Failed to fetch production data.');
@@ -85,7 +85,7 @@ const ProductionMonitoringPage = () => {
   return (
     <Container maxWidth="md">
       <Paper sx={{ p: 3, mt: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center' }}>
+        <Typography variant="h4" component="h1" gutterBottom sx={{ textAlign: 'center', color: 'black' }}>
           Renewable Energy Production Monitoring
         </Typography>
 
@@ -126,7 +126,7 @@ const ProductionMonitoringPage = () => {
         {productionData && (
           <Card variant="outlined">
             <CardContent>
-              <Typography variant="h5" component="h2" gutterBottom>
+              <Typography variant="h5" component="h2" gutterBottom sx={{ color: 'black' }}>
                 Production Report for: {productionData.clientUsername}
               </Typography>
               <Grid container spacing={2}>

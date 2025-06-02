@@ -39,7 +39,7 @@ function LoginForm() {
         mt: 1
       }}
     >
-      <Typography component="h2" variant="h6" sx={{ mb: 2}}>
+      <Typography component="h2" variant="h6" sx={{ mb: 2, textAlign: 'center' }} color="text.primary">
         Login
       </Typography>
       {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}

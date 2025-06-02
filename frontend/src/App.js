@@ -6,6 +6,8 @@ import LoginPage from './pages/LoginPage';
 import RegistrationPage from './pages/RegistrationPage';
 import CertificateRegistrationPage from './pages/CertificateRegistrationPage';
 import ProductionMonitoringPage from './pages/ProductionMonitoringPage';
+import InstallationRegistrationPage from './pages/InstallationRegistrationPage';
+import EnergyCreditsPage from './pages/EnergyCreditsPage';
 import { CssBaseline, Container, Typography, Button, Link, Box, CircularProgress, AppBar, Toolbar, IconButton } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu'; // Example icon
 
@@ -33,9 +35,14 @@ const AppLayout = ({ children }) => {
             <MenuIcon />
           </IconButton> */}
           <Toolbar>
-            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+            <Typography variant="h6" component={RouterLink} to="/home" sx={{ flexGrow: 1, color: 'inherit', textDecoration: 'none' }}>
               Energy Management System
             </Typography>
+            {user?.role === 'client' && (
+              <Button color="inherit" component={RouterLink} to="/register-installation">
+                Register Installation
+              </Button>
+            )}
             {user?.role === 'technician' && (
               <Button color="inherit" component={RouterLink} to="/register-certificate">
                 Register Certificate
@@ -44,6 +51,11 @@ const AppLayout = ({ children }) => {
             {user?.role === 'operationsManager' && (
               <Button color="inherit" component={RouterLink} to="/production-monitoring">
                 Monitor Production
+              </Button>
+            )}
+            {user?.role === 'operationsManager' && (
+              <Button color="inherit" component={RouterLink} to="/energy-credits">
+                Manage Energy Credits
               </Button>
             )}
             <Button color="inherit" onClick={handleLogout}>Logout</Button>
@@ -67,10 +79,10 @@ const HomePage = () => {
 
   return (
     <Box sx={{ textAlign: 'center', mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h4" component="h1" gutterBottom sx={{ color: 'black' }}>
         Welcome, {user?.username}!
       </Typography>
-      <Typography variant="subtitle1">
+      <Typography variant="subtitle1" sx={{ color: 'black' }}>
         Your Role: {user?.role}
       </Typography>
       <Typography variant="body1" sx={{ mt: 2 }}>
@@ -128,6 +140,21 @@ function OperationsManagerProtectedRoute({ children }) {
   return children;
 }
 
+// Protected Route Component for Clients
+function ClientProtectedRoute({ children }) {
+  const { isAuthenticated, isLoading, user } = useAuth();
+  if (isLoading) {
+    return <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}><CircularProgress /></Box>;
+  }
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  if (user?.role !== 'client') {
+    return <Navigate to="/home" replace />; // Or an unauthorized page
+  }
+  return children;
+}
+
 function App() {
   return (
     <AuthProvider>
@@ -171,6 +198,22 @@ function App() {
               element={(
                 <OperationsManagerProtectedRoute>
                   <ProductionMonitoringPage />
+                </OperationsManagerProtectedRoute>
+              )}
+            />
+            <Route 
+              path="/register-installation" 
+              element={(
+                <ClientProtectedRoute>
+                  <InstallationRegistrationPage />
+                </ClientProtectedRoute>
+              )}
+            />
+            <Route 
+              path="/energy-credits" 
+              element={(
+                <OperationsManagerProtectedRoute>
+                  <EnergyCreditsPage />
                 </OperationsManagerProtectedRoute>
               )}
             />

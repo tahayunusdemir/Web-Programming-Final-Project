@@ -24,21 +24,14 @@ const registerCertificate = async (formData) => {
   const token = getToken();
   try {
     // Note: When sending FormData, axios will set the Content-Type to multipart/form-data automatically.
-    // However, the backend needs to be configured to handle multipart/form-data (e.g., using multer).
-    // For now, the backend /register endpoint expects JSON with a file path string.
-    // This will need to be adjusted once file upload is fully implemented.
+    // The backend needs to be configured to handle multipart/form-data (e.g., using multer).
     
-    // Create a plain object for now, as the backend expects JSON
-    const certificateData = {
-        userId: formData.get('userId'),
-        userName: formData.get('userName'),
-        certificateFile: formData.get('certificateFile').name // Sending filename as placeholder
-    };
-
-    const response = await axios.post(`${API_URL}/register`, certificateData, {
+    // Sending the FormData directly, which includes the file.
+    // Remove the explicit 'Content-Type': 'application/json' header,
+    // so Axios can set it to 'multipart/form-data' with the correct boundary.
+    const response = await axios.post(`${API_URL}/register`, formData, {
         headers: { 
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json' // Explicitly set for JSON data
+            Authorization: `Bearer ${token}`
         }
     });
     return response.data; // { message: 'Certificate registered successfully.', certificate: ... }

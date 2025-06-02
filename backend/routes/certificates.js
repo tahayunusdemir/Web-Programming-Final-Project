@@ -4,6 +4,36 @@ const Certificate = require('../models/Certificate');
 const User = require('../models/User');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken'); // Import jsonwebtoken
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, '../uploads/certificates');
+if (!fs.existsSync(uploadsDir)){
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, req.body.userId + '-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'application/pdf') {
+    cb(null, true);
+  } else {
+    cb(new Error('Only .pdf files are allowed!'), false);
+  }
+};
+
+const upload = multer({ storage: storage, fileFilter: fileFilter, limits: { fileSize: 1024 * 1024 * 5 } }); // 5MB limit
 
 // Middleware to protect routes
 const authMiddleware = async (req, res, next) => {
@@ -70,43 +100,52 @@ const technicianOrManagerAuth = (req, res, next) => {
 };
 
 // @route   POST api/certificates/register
-// @desc    Register a new certificate for a user
+// @desc    Register a new certificate for a user (with file upload)
 // @access  Private (Technician only)
-router.post('/register', authMiddleware, technicianOnlyAuth, async (req, res) => {
-  const { userId, userName, certificateFile } = req.body;
-  const technicianId = req.user?.id; // Assuming technician's ID is available from auth middleware
+router.post('/register', authMiddleware, technicianOnlyAuth, upload.single('certificateFile'), async (req, res) => {
+  const { userId, userName } = req.body;
+  const technicianId = req.user?.id;
 
-  // Basic validation
-  if (!userId || !userName || !certificateFile) {
-    return res.status(400).json({ message: 'Please provide userId, userName, and certificateFile.' });
+  if (!req.file) {
+    return res.status(400).json({ message: 'Certificate PDF file is required.' });
+  }
+  
+  if (!userId || !userName) {
+    // If file was uploaded but other fields are missing, delete the uploaded file
+    fs.unlink(req.file.path, (err) => {
+      if (err) console.error("Error deleting orphaned file: ", err);
+    });
+    return res.status(400).json({ message: 'Please provide userId and userName.' });
   }
 
   try {
-    // 1. Verify the user (client) exists
     const user = await User.findById(userId);
     if (!user) {
+      fs.unlink(req.file.path, (err) => {
+        if (err) console.error("Error deleting file for non-existent user: ", err);
+      });
       return res.status(404).json({ message: 'User not found.' });
     }
-    // Optionally, verify the userName matches the found user's name if available in User model
-    // if (user.name !== userName) { // Assuming User model has a 'name' field
-    //   return res.status(400).json({ message: 'Provided userName does not match the user record.' });
-    // }
 
-    // 2. Create new certificate
     const newCertificate = new Certificate({
       userId,
-      userName, // Storing userName for easier searching/display as per Sprint2.md
-      certificateFile, // This would be a path to the PDF file
-      issuedBy: technicianId, // ID of the technician registering the certificate
+      userName, 
+      certificateFile: req.file.path, // Store the path to the uploaded file
+      issuedBy: technicianId,
+      originalFileName: req.file.originalname
     });
 
-    // 3. Save certificate to the database
     await newCertificate.save();
-
     res.status(201).json({ message: 'Certificate registered successfully.', certificate: newCertificate });
 
   } catch (err) {
     console.error(err.message);
+    // If an error occurs after file upload, attempt to delete the file
+    if (req.file && req.file.path) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+            if (unlinkErr) console.error("Error deleting file after save error: ", unlinkErr);
+        });
+    }
     if (err.name === 'ValidationError') {
       let errors = {};
       Object.keys(err.errors).forEach((key) => {
@@ -116,6 +155,20 @@ router.post('/register', authMiddleware, technicianOnlyAuth, async (req, res) =>
     }
     res.status(500).send('Server Error (certificate registration)');
   }
+});
+
+// Middleware for handling multer errors specifically for the /register route
+router.use('/register', (error, req, res, next) => {
+    if (error instanceof multer.MulterError) {
+        return res.status(400).json({ message: `File upload error: ${error.message}` });
+    } else if (error) {
+        // If it's the custom error from fileFilter for wrong file type
+        if (error.message === 'Only .pdf files are allowed!') {
+            return res.status(400).json({ message: error.message });
+        }
+        return res.status(500).json({ message: `An unexpected error occurred: ${error.message}` });
+    }
+    next();
 });
 
 // @route   GET api/certificates/user/:userId

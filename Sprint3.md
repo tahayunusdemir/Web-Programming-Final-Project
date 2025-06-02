@@ -1,9 +1,8 @@
-# Sprint 3: Implementation of Renewable Energy Production Monitoring
-
+# Implementation of Renewable Energy Production Monitoring
 This functionality should only be accessible to users associated with the 'Operations Manager' role.
-
 Customer data must be read from a Mock API that provides random numbers representative of the readings.
 
+# Accounting for Energy Credits
 This functionality should only be accessible to users associated with the 'Operations Manager' role.
 
 ## System Architecture
@@ -21,15 +20,4 @@ The system architecture consists of the following components and interactions:
     *   It responds with random kilowatt values (kws (Random)) to simulate energy readings from a customer's system.
     *   The main Node.JS server receives these random kilowatt values from the Customer API.
 
-```mermaid
-sequenceDiagram
-    participant Client [HTML+CSS+JS]
-    participant MainServer [Node.JS Server]
-    participant MockAPI [Customer API (Mock) Node.JS]
-    participant DB [MongoDB]
-
-    Client->>MainServer: /production/{idClient}
-    MainServer->>DB: Store/Retrieve Data
-    MainServer->>MockAPI: GET /production
-    MockAPI-->>MainServer: kws (Random)
-``` 
+![System Architecture Diagram](image.png) 

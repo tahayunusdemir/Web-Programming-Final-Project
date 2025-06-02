@@ -54,7 +54,7 @@ function RegistrationForm() {
         mt: 1,
       }}
     >
-      <Typography component="h2" variant="h6" sx={{ mb: 2 }}>
+      <Typography component="h2" variant="h6" sx={{ mb: 2 }} color="text.primary">
         Register New User
       </Typography>
       {error && <Alert severity="error" sx={{ width: '100%', mb: 2 }}>{error}</Alert>}

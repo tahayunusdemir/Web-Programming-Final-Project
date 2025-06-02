@@ -152,7 +152,7 @@ function CertificateRegistrationForm() {
       />
 
       {selectedUser && (
-        <Typography variant="subtitle1" sx={{ mt: 1, mb: 1 }}>
+        <Typography variant="subtitle1" sx={{ mt: 1, mb: 1, color: 'black' }}>
           Selected User: <strong>{selectedUser.name || selectedUser.username}</strong> (ID: {selectedUser.id})
         </Typography>
       )}

@@ -7,7 +7,7 @@ function RegistrationPage() {
   return (
     <Container component="main" maxWidth="xs" sx={{ mt: 8, mb: 4 }}>
       <Paper elevation={3} sx={{ p: 4, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-        <Typography component="h1" variant="h5" gutterBottom>
+        <Typography component="h1" variant="h5" gutterBottom color="text.primary">
           Create Account
         </Typography>
         <RegistrationForm />
