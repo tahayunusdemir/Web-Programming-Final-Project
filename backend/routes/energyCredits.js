@@ -10,13 +10,13 @@ const User = require('../models/User'); // User modelini de dahil et
 router.post('/', protect, authorize('operationsManager'), async (req, res) => {
   const { clientId, kwhGenerated, creditsEarned, notes } = req.body;
 
-  // Basit doğrulama
+  // Simple validation
   if (!clientId || kwhGenerated === undefined || creditsEarned === undefined) {
     return res.status(400).json({ message: 'Please provide clientId, kwhGenerated, and creditsEarned' });
   }
 
   try {
-    // İstemcinin var olup olmadığını kontrol et
+    // Check if the client exists
     const clientExists = await User.findById(clientId);
     if (!clientExists || clientExists.role !== 'client') {
       return res.status(404).json({ message: 'Client not found or user is not a client' });
@@ -27,7 +27,7 @@ router.post('/', protect, authorize('operationsManager'), async (req, res) => {
       kwhGenerated,
       creditsEarned,
       notes,
-      // calculationDate varsayılan olarak şemada ayarlanır
+      // calculationDate is set by default in the schema
     });
 
     const savedCredit = await newCredit.save();
@@ -48,13 +48,13 @@ router.get('/client/:clientId', protect, authorize('operationsManager'), async (
   try {
     const { clientId } = req.params;
 
-    // İstemcinin var olup olmadığını kontrol et (isteğe bağlı ama iyi bir pratik)
+    // Check if the client exists (optional but good practice)
     const clientExists = await User.findById(clientId);
     if (!clientExists || clientExists.role !== 'client') {
       return res.status(404).json({ message: 'Client not found or user is not a client' });
     }
 
-    const credits = await EnergyCredit.find({ clientId }).sort({ calculationDate: -1 }); // En yeniden eskiye sırala
+    const credits = await EnergyCredit.find({ clientId }).sort({ calculationDate: -1 }); // Sort from newest to oldest
     if (!credits || credits.length === 0) {
       return res.status(404).json({ message: 'No energy credits found for this client' });
     }
@@ -74,7 +74,7 @@ router.get('/client/:clientId', protect, authorize('operationsManager'), async (
 router.get('/:creditId', protect, authorize('operationsManager'), async (req, res) => {
   try {
     const { creditId } = req.params;
-    const credit = await EnergyCredit.findById(creditId).populate('clientId', 'username name email'); // İstemci bilgilerini de getir
+    const credit = await EnergyCredit.findById(creditId).populate('clientId', 'username name email'); // Also fetch client information
 
     if (!credit) {
       return res.status(404).json({ message: 'Energy credit record not found' });
@@ -96,7 +96,7 @@ router.put('/:creditId', protect, authorize('operationsManager'), async (req, re
   const { kwhGenerated, creditsEarned, notes } = req.body;
   const { creditId } = req.params;
 
-  // En az bir alanın güncellenmek üzere sağlandığından emin ol
+  // Ensure at least one field is provided for update
   if (kwhGenerated === undefined && creditsEarned === undefined && notes === undefined) {
     return res.status(400).json({ message: 'Please provide at least one field to update (kwhGenerated, creditsEarned, notes)' });
   }
@@ -108,12 +108,12 @@ router.put('/:creditId', protect, authorize('operationsManager'), async (req, re
       return res.status(404).json({ message: 'Energy credit record not found' });
     }
 
-    // Alanları güncelle
+    // Update fields
     if (kwhGenerated !== undefined) credit.kwhGenerated = kwhGenerated;
     if (creditsEarned !== undefined) credit.creditsEarned = creditsEarned;
     if (notes !== undefined) credit.notes = notes;
-    // calculationDate otomatik olarak güncellenmez, gerekirse manuel olarak ayarlanabilir
-    // credit.calculationDate = new Date(); // Eğer her güncellemede hesaplama tarihini de güncellemek isterseniz
+    // calculationDate is not updated automatically, can be set manually if needed
+    // credit.calculationDate = new Date(); // If you want to update the calculation date with every update
 
     const updatedCredit = await credit.save();
     res.json(updatedCredit);
@@ -138,7 +138,7 @@ router.delete('/:creditId', protect, authorize('operationsManager'), async (req,
       return res.status(404).json({ message: 'Energy credit record not found' });
     }
 
-    await credit.deleteOne(); // Mongoose v6+ için remove() yerine deleteOne() veya findByIdAndDelete()
+    await credit.deleteOne(); // For Mongoose v6+, use deleteOne() or findByIdAndDelete() instead of remove()
     res.json({ message: 'Energy credit record removed successfully' });
   } catch (error) {
     console.error('Error deleting energy credit:', error);

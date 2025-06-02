@@ -39,7 +39,7 @@ export const getAllClients = async () => {
   }
 };
 
-// Artık varsayılan dışa aktarma kullanmıyoruz, bunun yerine adlandırılmış dışa aktarmalar kullanılıyor.
+// We are no longer using default export, named exports are used instead.
 // const productionService = {
 //   getProductionData,
 //   getAllClients,

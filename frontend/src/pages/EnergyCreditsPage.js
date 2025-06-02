@@ -22,14 +22,14 @@ const EnergyCreditsPage = () => {
   const [kwhGenerated, setKwhGenerated] = useState('');
   const [creditsEarned, setCreditsEarned] = useState('');
   const [notes, setNotes] = useState('');
-  const [editingCredit, setEditingCredit] = useState(null); // Düzenlenen kredi nesnesini tutar
+  const [editingCredit, setEditingCredit] = useState(null); // Stores the credit object being edited
 
-  // İstemcileri yükle
+  // Load clients
   useEffect(() => {
     const fetchClients = async () => {
       try {
         setIsLoading(true);
-        const data = await getAllClients(); // Bu fonksiyon teknisyen ve operasyon yöneticisi için çalışır
+        const data = await getAllClients(); // This function works for technicians and operations managers
         setClients(data || []);
         setError('');
       } catch (err) {
@@ -44,7 +44,7 @@ const EnergyCreditsPage = () => {
     }
   }, [user, token]);
 
-  // Seçilen istemci değiştiğinde kredileri yükle
+  // Load credits when the selected client changes
   useEffect(() => {
     if (selectedClient) {
       const fetchCredits = async () => {
@@ -85,12 +85,12 @@ const EnergyCreditsPage = () => {
         await createEnergyCredit(creditData, token);
         setSuccessMessage('Energy credit created successfully!');
       }
-      // Formu ve düzenleme durumunu sıfırla
+      // Reset form and editing state
       setKwhGenerated('');
       setCreditsEarned('');
       setNotes('');
       setEditingCredit(null);
-      // Kredileri yeniden yükle
+      // Reload credits
       const data = await getEnergyCreditsByClient(selectedClient, token);
       setCredits(data || []);
     } catch (err) {
@@ -117,7 +117,7 @@ const EnergyCreditsPage = () => {
       try {
         await deleteEnergyCredit(creditId, token);
         setSuccessMessage('Energy credit deleted successfully!');
-        // Kredileri yeniden yükle
+        // Reload credits
         const data = await getEnergyCreditsByClient(selectedClient, token);
         setCredits(data || []);
       } catch (err) {
@@ -166,10 +166,10 @@ const EnergyCreditsPage = () => {
                   label="Select Client"
                   onChange={(e) => {
                       setSelectedClient(e.target.value);
-                      setCredits([]); // Yeni istemci seçildiğinde eski kredileri temizle
-                      clearForm(); // Formu temizle
+                      setCredits([]); // Clear old credits when a new client is selected
+                      clearForm(); // Clear the form
                   }}
-                  disabled={!!editingCredit} // Düzenleme modunda istemci değiştirilemez
+                  disabled={!!editingCredit} // Client cannot be changed in edit mode
                 >
                   <MenuItem value="">
                     <em>Select a client</em>

@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
-// Kullanıcının kimliğini doğrular ve isteğe ekler
+// Verifies the user's identity and adds it to the request
 const protect = async (req, res, next) => {
   let token;
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
@@ -23,7 +23,7 @@ const protect = async (req, res, next) => {
   }
 };
 
-// Belirli rollere erişimi kısıtlar
+// Restricts access to specific roles
 const authorize = (...roles) => {
   return (req, res, next) => {
     if (!req.user || !roles.includes(req.user.role)) {
