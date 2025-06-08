@@ -48,7 +48,7 @@ The application is composed of three main services that run concurrently: a fron
 3.  **Mock Customer API (Node.js/Express):** A separate service that simulates the real-world API of a customer's energy monitoring hardware. It provides random energy production data when requested by the main backend.
 4.  **Database (MongoDB):** Stores all application data, including user credentials, installation details, and energy credit records.
 
-![System Architecture Diagram](image.png)
+![System Architecture Diagram](/docs/image.png)
 
 ## Technologies Used
 
