@@ -15,7 +15,8 @@ import {
     Divider,
     Accordion,
     AccordionSummary,
-    AccordionDetails
+    AccordionDetails,
+    ListItemButton
 } from '@mui/material';
 import authService from '../services/authService';
 import productionService from '../services/productionService';
@@ -97,28 +98,27 @@ const OperationsManagerPage = () => {
                 Operations Manager Console
             </Typography>
             <Grid container spacing={3}>
-                <Grid item xs={12} md={4}>
+                <Grid xs={12} md={4}>
                     <Paper elevation={3}>
                         <Card>
                             <CardContent>
                                 <Typography variant="h6">Clients</Typography>
                                 <List>
                                     {clients.map((client) => (
-                                        <ListItem
-                                            button
+                                        <ListItemButton
                                             key={client._id}
                                             selected={selectedClient?._id === client._id}
                                             onClick={() => handleSelectClient(client)}
                                         >
                                             <ListItemText primary={client.username} />
-                                        </ListItem>
+                                        </ListItemButton>
                                     ))}
                                 </List>
                             </CardContent>
                         </Card>
                     </Paper>
                 </Grid>
-                <Grid item xs={12} md={8}>
+                <Grid xs={12} md={8}>
                     <Paper elevation={3}>
                         <Card>
                             <CardContent>

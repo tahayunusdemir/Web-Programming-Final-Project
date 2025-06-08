@@ -192,6 +192,7 @@ Web-Programming-Final-Project/
 ├── mock-customer-api/      # Mock API for energy data (Node.js/Express)
 ├── docs/                   # Documentation files
 │   ├── BACKLOG.md          # Project history and commands log
+│   ├── FinalReport.md      # Final project report with implementation details and conclusions
 │   ├── Sprint1.md          # Details for Sprint 1
 │   ├── Sprint2.md          # Details for Sprint 2
 │   ├── Sprint3.md          # Details for Sprint 3

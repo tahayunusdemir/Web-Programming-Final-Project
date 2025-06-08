@@ -103,7 +103,7 @@ const TechnicianPage = () => {
             ) : (
                 <Grid container spacing={3}>
                     {installations.map((inst) => (
-                        <Grid item xs={12} md={6} lg={4} key={inst._id}>
+                        <Grid xs={12} md={6} lg={4} key={inst._id}>
                             <Card>
                                 <CardContent>
                                     <Typography variant="h6">{inst.location}</Typography>

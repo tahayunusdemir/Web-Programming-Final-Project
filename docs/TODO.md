@@ -46,15 +46,15 @@ Based on `Trabalho_Final_PW.md`.
 -   [x] Develop a feature to upload an energy producer certificate (.pdf file) for the validated installation.
 -   [x] Store the certificate and associate it with the correct user and installation in the database.
 -   [x] Ensure certificates are recorded and accessible within the application.
--   [ ] Implement an automated email service to notify customers monthly about their generated energy.
+-   [x] Implement an automated email service to notify customers monthly about their generated energy.
 
 ### **Energy Monitoring & Credit Accounting (Sprint 3)**
 -   This entire feature set should only be accessible to users with the 'Operations Manager' role.
 
 #### **1. Mock Customer API (Separate Node.js Service)**
--   [ ] Set up a separate Node.js project to act as the mock Customer API.
--   [ ] Create a `GET /production` endpoint within this service.
--   [ ] Implement logic for this endpoint to generate and respond with a random number representing kilowatt (kW) production.
+-   [x] Set up a separate Node.js project to act as the mock Customer API.
+-   [x] Create a `GET /production` endpoint within this service.
+-   [x] Implement logic for this endpoint to generate and respond with a random number representing kilowatt (kW) production.
 
 #### **2. Main Backend Application**
 -   [x] **Production Monitoring Endpoint:**
@@ -62,7 +62,7 @@ Based on `Trabalho_Final_PW.md`.
     -   [x] Secure this endpoint so only 'Operations Manager' roles can access it.
     -   [x] When called, this endpoint should make a `GET` request to the mock Customer API's `/production` endpoint.
     -   [x] Store the received random kW value in the MongoDB database, associating it with the `idClient`.
--   [ ] **Energy Credit Accounting:**
+-   [x] **Energy Credit Accounting:**
     -   [x] Implement a process (e.g., automated monthly job or a manual trigger for the manager) for accounting.
     -   [x] This process should calculate the energy produced versus the energy consumed (if consumption data is available; otherwise, use a placeholder).
     -   [x] Convert the surplus energy into credits (e.g., 1 kWh = 1 credit).
@@ -87,18 +87,18 @@ Based on `Trabalho_Final_PW.md`.
 ## Phase 4: Sprint and Final Delivery
 
 ### **Sprint Delivery Rules**
--   [ ] Complete all tasks for each sprint by the scheduled dates.
--   [ ] The Product Owner for the sprint is responsible for committing the new version of the code with the message `Sprint n`.
--   [ ] The Product Owner will defend the sprint's work in the class following its completion (max. 5-minute presentation).
--   [ ] All group members must be present at the sprint presentation to receive a grade.
+-   [x] Complete all tasks for each sprint by the scheduled dates.
+-   [x] The Product Owner for the sprint is responsible for committing the new version of the code with the message `Sprint n`.
+-   [x] The Product Owner will defend the sprint's work in the class following its completion (max. 5-minute presentation).
+-   [x] All group members must be present at the sprint presentation to receive a grade.
 
 ### **Final Project Delivery**
--   [ ] Prepare a final report with the following structure:
-    -   [ ] **Introduction:** A general description of the developed application.
-    -   [ ] **Implementation:** An explanation of the most important parts of the implemented solution.
-    -   [ ] **Conclusion:** An analysis of the solution, including its limitations, potential improvements, and future functionalities.
--   [ ] Package the complete project code and the final report into a single compressed file (ZIP/RAR).
--   [ ] Submit the file on the Moodle platform by the deadline.
+-   [x] Prepare a final report with the following structure:
+    -   [x] **Introduction:** A general description of the developed application.
+    -   [x] **Implementation:** An explanation of the most important parts of the implemented solution.
+    -   [x] **Conclusion:** An analysis of the solution, including its limitations, potential improvements, and future functionalities.
+-   [x] Package the complete project code and the final report into a single compressed file (ZIP/RAR).
+-   [x] Submit the file on the Moodle platform by the deadline.
 
 ## Evaluation Criteria (For Reference)
 -   [ ] Volume of work produced in class (10%)
